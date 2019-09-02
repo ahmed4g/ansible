@@ -22,4 +22,24 @@
 - name: Install Docker
   apt:
     name: [ 'docker-ce', 'docker-ce-cli', 'containerd.io' ]
-  become: yes 
+  become: yes
+  
+
+- name: Install docker-compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 0755
+    
+- name: link /usr/local/bin/docker-compose
+  become: yes
+  become_user: root
+  file:
+    src: /usr/local/bin/docker-compose
+    dest: /usr/bin/docker-compose
+    state: link
+- name: copy docker-compose files
+  copy:
+   dest: ""
+    src: ""
+    mode: 
