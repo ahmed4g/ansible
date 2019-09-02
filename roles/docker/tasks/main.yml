@@ -1,35 +1,25 @@
 ---
-- name: install packages required by docker
-  apt:
-    name: "{{ item }}"
-    state: present
-    update_cache: yes
-  with_items:
-    - linux-image-extra-virtual
-    - apt-transport-https
+- name: Update apt cache 
+  apt: update_cache=yes 
+  become: yes 
+ 
+- name: Install dependencies for docker-debian
+  apt:  
+    name: [ 'aptitude', 'apt-transport-https', 'ca-certificates', 'gnupg2', 'software-properties-common' ]
+    state: latest 
+  become: yes 
 
-- name: add docker repository key
-  apt_key:
-    url: "{{ apt_key_url }}"
-    state: present
-  register: add_repository_key
-  ignore_errors: true
+- name: Add Docker GPG key
+  apt_key: 
+    url: https://download.docker.com/linux/debian/gpg
+  become: yes 
 
-- name: add docker repository and update apt cache
+- name: Add Docker APT repository
   apt_repository:
-    repo: "{{ cs_apt_repository }}"
-    update_cache: yes
-    state: present
+    repo: deb [arch=amd64] https://download.docker.com/linux/{{ansible_distribution|lower}} {{ansible_distribution_release}} stable
+  become: yes 
 
-- name: install (or update) docker package
+- name: Install Docker
   apt:
-    name: "docker-engine"
-    state: "{{ 'latest' if update_docker_package else 'present' }}"
-    update_cache: yes
-  notify:
-    - restart docker service
-
-- name: start docker
-  service:
-    name: docker
-    state: started
+    name: [ 'docker-ce', 'docker-ce-cli', 'containerd.io' ]
+  become: yes 
